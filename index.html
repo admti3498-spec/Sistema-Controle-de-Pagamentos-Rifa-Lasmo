@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rifa em prol da LASMO</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-pink: #f472b6;
+      --primary-dark: #db2777;
+      --bg-pink: #fdf2f8;
+      --card-bg: #ffffff;
+      --text-dark: #831843;
+      --text-muted: #9d174d;
+      --border-pink: #fbcfe8;
+      --bought-x: #ec4899;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    body { background: var(--bg-pink); color: var(--text-dark); padding: 20px 10px; display: flex; justify-content: center; min-height: 100vh; }
+
+    .container { width: 100%; max-width: 950px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* CARD HEADER */
+    .header-card {
+      background: linear-gradient(135deg, #ffffff 0%, #fce7f3 100%);
+      border: 2px solid var(--border-pink);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.1);
+      position: relative;
+    }
+
+    .header-card h1 { font-size: 28px; font-weight: 800; color: var(--primary-dark); letter-spacing: -0.5px; }
+    .header-card p.subtitle { font-size: 15px; font-weight: 600; color: #be185d; margin-top: 4px; }
+
+    /* PREMIOS & DETALHES */
+    .info-box {
+      background: #ffffff;
+      border: 1px solid var(--border-pink);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 15px;
+      font-size: 13px;
+    }
+
+    .premios-list { text-align: left; }
+    .premios-list h4 { color: var(--primary-dark); margin-bottom: 6px; font-size: 14px; }
+    .premios-list ul { list-style: none; }
+    .premios-list li { margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+    .premios-list li::before { content: "💖"; font-size: 10px; }
+
+    .pix-box {
+      background: #fdf2f8;
+      border: 2px dashed var(--primary-pink);
+      padding: 12px 18px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .pix-box strong { color: var(--primary-dark); font-size: 14px; display: block; }
+    .pix-key { font-weight: 700; color: #be185d; word-break: break-all; margin-top: 4px; font-size: 13px; }
+
+    /* BARRA DE PROGRESSO */
+    .progress-section { margin-top: 20px; text-align: left; }
+    .progress-labels { display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; color: var(--primary-dark); margin-bottom: 6px; }
+    .progress-bar-bg { width: 100%; height: 22px; background: #fbcfe8; border-radius: 11px; overflow: hidden; padding: 2px; }
+    .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f472b6, #db2777); border-radius: 9px; transition: width 0.4s ease; }
+
+    /* ABAS DE NAVEGAÇÃO */
+    .tabs-nav { display: flex; gap: 10px; margin-top: 10px; }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--border-pink);
+      background: #ffffff;
+      color: var(--primary-dark);
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .tab-btn.active { background: var(--primary-dark); color: #ffffff; border-color: var(--primary-dark); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* GRADE DA RIFA (01 ao 50) */
+    .rifa-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+    }
+    @media (max-width: 600px) { .rifa-grid { grid-template-columns: repeat(5, 1fr); } }
+
+    .num-card {
+      background: #fbcfe8;
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 18px;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      transition: transform 0.1s ease;
+    }
+    .num-card:hover:not(.bought) { transform: scale(1.05); background: #f472b6; color: #fff; }
+
+    .num-card.bought {
+      background: #fce7f3;
+      color: rgba(157, 23, 77, 0.3);
+      cursor: not-allowed;
+    }
+    .num-card.bought::after {
+      content: "X";
+      position: absolute;
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--bought-x);
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+    }
+
+    /* CARD DE CADASTRO */
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border-pink); box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.05); }
+    .card h3 { color: var(--primary-dark); font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+    .form-grid { display: grid; grid-template-columns: 2fr 1fr 2fr 2fr 1fr; gap: 10px; align-items: end; }
+    @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid var(--border-pink); border-radius: 8px; font-size: 13px; outline: none; background: #fff; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary-dark); }
+
+    .btn-submit {
+      background: var(--primary-dark);
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      height: 41px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: #be185d; }
+
+    /* TABELA DE COMPRADORES */
+    .table-container { overflow-x: auto; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { background: #fdf2f8; padding: 12px; font-size: 11px; font-weight: 700; color: var(--primary-dark); text-transform: uppercase; border-bottom: 1px solid var(--border-pink); }
+    td { padding: 12px; border-bottom: 1px solid var(--border-pink); vertical-align: middle; }
+    tr:hover { background: #fcf2f7; }
+
+    .badge-num { background: #fbcfe8; color: var(--primary-dark); font-weight: 800; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .badge-dinheiro { background: #dcfce7; color: #15803d; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+    
+    .btn-view { background: #fce7f3; color: var(--primary-dark); border: 1px solid var(--border-pink); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-view:hover { background: #fbcfe8; }
+    .btn-del { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; padding: 4px; }
+
+    /* MODAL COMPROVANTE PDF */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(131, 24, 67, 0.5); backdrop-filter: blur(3px); z-index: 100; justify-content: center; align-items: center; padding: 15px; }
+    .modal-card { background: #fff; border-radius: var(--radius); padding: 20px; max-width: 650px; width: 100%; position: relative; max-height: 90vh; display: flex; flex-direction: column; }
+    .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+    .preview-area { margin-top: 15px; flex: 1; overflow-y: auto; display: flex; justify-content: center; }
+    .preview-area iframe { width: 100%; height: 500px; border-radius: 8px; border: 1px solid var(--border-pink); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- CABEÇALHO & DETALHES DA RIFA -->
+    <div class="header-card">
+      <h1>RIFA em prol da LASMO 💕</h1>
+      <p class="subtitle">Sorteio On-line no dia <strong>19/10</strong> — <strong>R$ 10,00</strong> cada número</p>
+
+      <div class="info-box">
+        <div class="premios-list">
+          <h4>🎁 CONCORRA A:</h4>
+          <ul>
+            <li>Biquíni Oceanic</li>
+            <li>Brinco Morena</li>
+            <li>Creme para as mãos</li>
+            <li>Ecobag e Estojo</li>
+            <li>Chocolates Cacau Show</li>
+          </ul>
+        </div>
+
+        <div class="pix-box">
+          <strong>💳 CHAVE PIX</strong>
+          <div class="pix-key">tamires.ariane@mail.usf.edu.br</div>
+          <small style="color: var(--text-muted); font-size: 11px; margin-top:4px; display:block;">Liga Acadêmica Multidisciplinar em Saúde da Mulher e Oncologia (LASMO)</small>
+        </div>
+      </div>
+
+      <!-- BARRA DE PROGRESSO -->
+      <div class="progress-section">
+        <div class="progress-labels">
+          <span>Progresso das Vendas</span>
+          <span id="progressText">0% (0 / 50 vendidos)</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progressBar" class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVEGAÇÃO DE ABAS -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="btnTabGrade" onclick="alternarAba('grade')">
+        <i class="fas fa-th"></i> Cartela da Rifa (01 ao 50)
+      </button>
+      <button class="tab-btn" id="btnTabLista" onclick="alternarAba('lista')">
+        <i class="fas fa-users"></i> Lista de Compradores
+      </button>
+    </div>
+
+    <!-- ABA 1: GRADE DA RIFA & FORMULÁRIO -->
+    <div id="tabGrade" class="tab-content active">
+      
+      <!-- FORMULÁRIO DE CADASTRO -->
+      <div class="card" style="margin-bottom: 20px;">
+        <h3><i class="fas fa-user-plus"></i> Registrar Nova Compra</h3>
+        <form id="formRifa" onsubmit="salvarComprador(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nome do Comprador *</label>
+              <input type="text" id="inputNome" placeholder="Ex: Ana Silva" required>
+            </div>
+            <div class="form-group">
+              <label>Nº Escolhido *</label>
+              <input type="number" id="inputNumero" min="1" max="50" placeholder="1 a 50" required>
+            </div>
+            <div class="form-group">
+              <label>Forma de Pagamento *</label>
+              <select id="selectPagamento" onchange="alternarCampoComprovante()" required>
+                <option value="DINHEIRO">💵 Dinheiro Espécie</option>
+                <option value="COMPROVANTE">📄 Comprovante PIX (PDF)</option>
+              </select>
+            </div>
+            <div class="form-group" id="groupComprovante" style="display: none;">
+              <label>Anexar Comprovante (PDF) *</label>
+              <input type="file" id="inputComprovante" accept="application/pdf">
+            </div>
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-check-circle"></i> Confirmar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- CARTELA DE NÚMEROS COM 'X' -->
+      <div class="card">
+        <h3><i class="fas fa-border-all"></i> Números Disponíveis (Clique para selecionar)</h3>
+        <div id="rifaGrid" class="rifa-grid"></div>
+      </div>
+
+    </div>
+
+    <!-- ABA 2: LISTA DE COMPRADORES -->
+    <div id="tabLista" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-clipboard-list"></i> Compradores Confirmados</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nº Rifa</th>
+                <th>Nome do Comprador</th>
+                <th>Pagamento / Comprovante</th>
+                <th style="text-align: right;">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL DE VISUALIZAÇÃO DE COMPROVANTE PDF -->
+  <div id="modalComprovante" class="modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
+      <h3 style="color: var(--primary-dark); font-size: 15px;">Comprovante de Pagamento PDF</h3>
+      <div id="previewArea" class="preview-area"></div>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_NUMEROS = 50;
+    const DB_KEY = 'lasmo_rifa_database';
+
+    window.onload = function() {
+      carregarRifa();
+    };
+
+    function lerDados() {
+      return JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    }
+
+    function salvarDados(dados) {
+      localStorage.setItem(DB_KEY, JSON.stringify(dados));
+    }
+
+    function alternarCampoComprovante() {
+      const tipo = document.getElementById('selectPagamento').value;
+      const groupComp = document.getElementById('groupComprovante');
+      const inputComp = document.getElementById('inputComprovante');
+
+      if (tipo === 'COMPROVANTE') {
+        groupComp.style.display = 'flex';
+        inputComp.required = true;
+      } else {
+        groupComp.style.display = 'none';
+        inputComp.required = false;
+        inputComp.value = '';
+      }
+    }
+
+    function alternarAba(aba) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      if (aba === 'grade') {
+        document.getElementById('btnTabGrade').classList.add('active');
+        document.getElementById('tabGrade').classList.add('active');
+      } else {
+        document.getElementById('btnTabLista').classList.add('active');
+        document.getElementById('tabLista').classList.add('active');
+      }
+    }
+
+    function carregarRifa() {
+      const lista = lerDados();
+      
+      // 1. Atualiza Barra de Progresso
+      const totalVendidos = lista.length;
+      const porcentagem = Math.min(Math.round((totalVendidos / TOTAL_NUMEROS) * 100), 100);
+      
+      document.getElementById('progressBar').style.width = porcentagem + '%';
+      document.getElementById('progressText').innerText = `${porcentagem}% (${totalVendidos} / ${TOTAL_NUMEROS} vendidos)`;
+
+      // 2. Renderiza Cartela de Números (01 a 50)
+      const grid = document.getElementById('rifaGrid');
+      grid.innerHTML = '';
+
+      const numerosComprados = new Set(lista.map(x => x.numero));
+
+      for (let i = 1; i <= TOTAL_NUMEROS; i++) {
+        const card = document.createElement('div');
+        const numFormatado = String(i).padStart(2, '0');
+        
+        card.className = 'num-card' + (numerosComprados.has(i) ? ' bought' : '');
+        card.innerText = numFormatado;
+
+        if (!numerosComprados.has(i)) {
+          card.onclick = () => selecionarNumero(i);
+        }
+
+        grid.appendChild(card);
+      }
+
+      // 3. Renderiza Tabela de Compradores
+      const tbody = document.getElementById('tabelaBody');
+      tbody.innerHTML = '';
+
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Nenhuma compra registrada até o momento.</td></tr>';
+        return;
+      }
+
+      lista.sort((a, b) => a.numero - b.numero);
+
+      lista.forEach(item => {
+        let colunaPagamento = '';
+
+        if (item.formaPagamento === 'DINHEIRO') {
+          colunaPagamento = `<span class="badge-dinheiro"><i class="fas fa-money-bill-wave"></i> Dinheiro</span>`;
+        } else {
+          colunaPagamento = `
+            <button class="btn-view" onclick="verComprovante(${item.id})">
+              <i class="fas fa-file-pdf"></i> Ver PDF
+            </button>
+          `;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge-num">Nº ${String(item.numero).padStart(2, '0')}</span></td>
+          <td><strong>${item.nome}</strong></td>
+          <td>${colunaPagamento}</td>
+          <td style="text-align: right;">
+            <button class="btn-del" title="Excluir" onclick="excluirComprador(${item.id})">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function selecionarNumero(num) {
+      document.getElementById('inputNumero').value = num;
+      document.getElementById('inputNome').focus();
+    }
+
+    function salvarComprador(e) {
+      e.preventDefault();
+
+      const nome = document.getElementById('inputNome').value.trim();
+      const numero = parseInt(document.getElementById('inputNumero').value);
+      const formaPagamento = document.getElementById('selectPagamento').value;
+      const fileInput = document.getElementById('inputComprovante');
+
+      if (numero < 1 || numero > TOTAL_NUMEROS) {
+        return alert(`Por favor, escolha um número válido entre 01 e ${TOTAL_NUMEROS}.`);
+      }
+
+      let lista = lerDados();
+
+      if (lista.some(x => x.numero === numero)) {
+        return alert(`O número ${String(numero).padStart(2, '0')} já foi comprado e está marcado com 'X'. Escolha outro!`);
+      }
+
+      const finalizarRegistro = (comprovanteBase64 = null) => {
+        lista.push({
+          id: Date.now(),
+          nome: nome,
+          numero: numero,
+          formaPagamento: formaPagamento,
+          comprovante: comprovanteBase64
+        });
+
+        salvarDados(lista);
+        document.getElementById('formRifa').reset();
+        alternarCampoComprovante();
+        carregarRifa();
+        alert(`✅ Compra do Número ${String(numero).padStart(2, '0')} registrada com sucesso!`);
+      };
+
+      if (formaPagamento === 'COMPROVANTE') {
+        const file = fileInput.files[0];
+
+        if (!file || !file.type.includes('pdf')) {
+          return alert('Por favor, anexe um arquivo válido no formato PDF!');
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          finalizarRegistro(evt.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        finalizarRegistro();
+      }
+    }
+
+    function verComprovante(id) {
+      const item = lerDados().find(x => x.id === id);
+      if (!item || !item.comprovante) return;
+
+      const previewArea = document.getElementById('previewArea');
+      previewArea.innerHTML = `<iframe src="${item.comprovante}" width="100%" height="500px"></iframe>`;
+
+      document.getElementById('modalComprovante').style.display = 'flex';
+    }
+
+    function fecharModal() {
+      document.getElementById('modalComprovante').style.display = 'none';
+    }
+
+    function excluirComprador(id) {
+      if (confirm('Deseja remover esta compra? O número voltará a ficar disponível na cartela.')) {
+        salvarDados(lerDados().filter(x => x.id !== id));
+        carregarRifa();
+      }
+    }
+  </script>
+</body>
+</html>
